@@ -17,9 +17,12 @@ SET(CMAKE_C_STANDARD 11)
 SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 SET(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 
-include_directories(.)
+include_directories(. ./Lists)
+add_subdirectory(./Lists)
+
 add_executable(GlobalMemPoolUnit.test MemPoolCommon.hpp GlobalMemPool.hpp GlobalMemPoolUnitTest.cpp)
 add_executable(GlobalMemPoolPerf.test MemPoolCommon.hpp GlobalMemPool.hpp GlobalMemPoolPerfTest.cpp)
 
 enable_testing()
 add_test(NAME GlobalMemPoolUnit.test COMMAND GlobalMemPoolUnit.test)
+

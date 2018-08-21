@@ -1,44 +1,8 @@
 #include <GlobalMemPool.hpp>
 
-#include <alya.h>
 
 int main()
 {
-    const size_t SIZE = 4 * 1024 * 1024;
-    void* ptr = mmap(0, SIZE * 2, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    COUTF(ptr);
-    uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
-    uintptr_t next_p;
-    if (p % SIZE == 0)
-    {
-        COUT("cool!");
-        next_p = p + 2 * SIZE;
-    }
-    else
-    {
-        COUT("cutting");
-        uintptr_t post = p % SIZE;
-        uintptr_t pre = SIZE - post;
-        next_p = p + pre + SIZE;
-        int r1 = munmap(reinterpret_cast<void*>(p), pre);
-        int r2 = munmap(reinterpret_cast<void*>(next_p), post);
-        COUTF(r1, r2);
-    }
-
-    COUTF(reinterpret_cast<void*>(next_p));
-    ptr = mmap(reinterpret_cast<void*>(next_p), SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    COUTF(ptr);
-    next_p += SIZE;
-
-    COUTF(reinterpret_cast<void*>(next_p));
-    ptr = mmap(reinterpret_cast<void*>(next_p), SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    COUTF(ptr);
-    next_p += SIZE;
-
-    COUTF(reinterpret_cast<void*>(next_p));
-    ptr = mmap(reinterpret_cast<void*>(next_p), SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    COUTF(ptr);
-    next_p += SIZE;
 
     GlobalMemPool<1>::alloc();
     GlobalMemPool<2>::alloc();

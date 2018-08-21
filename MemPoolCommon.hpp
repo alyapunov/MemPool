@@ -2,6 +2,9 @@
 
 #include <cstddef>
 
+#define MEMPOOL_LIKELY(x) __builtin_expect((x), 1)
+#define MEMPOOL_UNLIKELY(x) __builtin_expect((x), 0)
+
 template<size_t SIZE>
 struct MemPoolBlock
 {
