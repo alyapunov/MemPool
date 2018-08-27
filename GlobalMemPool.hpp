@@ -35,7 +35,7 @@ private:
     // Mempool calls mmap approximately once per SYSCALL_DIVIDER allocations.
     // By my measurements syscall performance is about 3Mrps.
     // Set BLOCKS_IN_SLAB big enough avoiding making the mmap call a bottleneck.
-    static constexpr size_t SYSCALL_DIVIDER = 256;
+    static constexpr size_t SYSCALL_DIVIDER = 512;
 public:
     static constexpr size_t SLAB_SIZE = memPoolCeil2(BLOCK_SIZE * SYSCALL_DIVIDER);
 private:
@@ -57,9 +57,9 @@ private:
 public:
     static constexpr size_t BLOCKS_IN_SLAB = (SLAB_SIZE - sizeof(SlabHeader)) / BLOCK_SIZE;
     static_assert(BLOCKS_IN_SLAB > 1, "Too small slab");
-    static constexpr size_t MAX_MMAP_SLABS = 6;
+    static constexpr size_t MAX_MMAP_SLABS = 4;
 private:
-    static constexpr size_t MOVE_GROUP_THRESHOLD_PERCENT = 5;
+    static constexpr size_t MOVE_GROUP_THRESHOLD_PERCENT = 4;
     struct Slab : SlabHeader, GlobalMemPoolPadding<PADDING_SIZE>
     {
         Block m_Blocks[BLOCKS_IN_SLAB];
@@ -102,7 +102,7 @@ private:
         if (MEMPOOL_UNLIKELY(nullptr != m_NewSlab))
         {
             char* sRes = m_NewSlab->m_Blocks[m_NewSlabPos].m_Data;
-            if (BLOCKS_IN_SLAB == ++m_NewSlabPos)
+            if (MEMPOOL_UNLIKELY(BLOCKS_IN_SLAB == ++m_NewSlabPos))
             {
                 m_NewSlab = m_NewSlab->m_NextNew;
                 m_NewSlabPos = 0;
@@ -164,16 +164,18 @@ private:
 
     void internalFree(char* aBlock)
     {
-        ++m_FreeCount;
         Block* sBlock = reinterpret_cast<Block*>(aBlock);
         Slab* sSlab = slabByBlock(aBlock);
         sBlock->m_Next = sSlab->m_FreeList;
         sSlab->m_FreeList = sBlock;
         size_t sWasFreeCount = sSlab->m_FreeCount++;
+        if (MEMPOOL_LIKELY(sSlab->m_IsInFreeList))
+            ++m_FreeCount;
         const size_t INTRODUCE_GROUP_TRESHOLD = BLOCKS_IN_SLAB * MOVE_GROUP_THRESHOLD_PERCENT / 100;
         const size_t MOVE_GROUP_TRESHOLD = BLOCKS_IN_SLAB * (50 + MOVE_GROUP_THRESHOLD_PERCENT) / 100;
         if (MEMPOOL_UNLIKELY(INTRODUCE_GROUP_TRESHOLD == sWasFreeCount && !sSlab->m_IsInFreeList))
         {
+            m_FreeCount += sSlab->m_FreeCount;
             m_FreeList[0].insert(*sSlab);
             sSlab->m_IsInFreeList = true;
         }
