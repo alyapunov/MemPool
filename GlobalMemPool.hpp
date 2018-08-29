@@ -45,11 +45,10 @@ private:
     {
         AutoListLink m_AllLink;
         SlightlyOrderedListLink m_FreeLink;
-        Block* m_FreeList = nullptr;
-        size_t m_FreeCount = 0;
-        Slab* m_NextNew = nullptr;
-        bool m_IsInFreeList = false;
-        bool m_Group = false;
+        MemPoolBitset<SLAB_SIZE / BLOCK_SIZE> m_FreeMap;
+        size_t m_FreeCount = BLOCKS_IN_SLAB;
+        bool m_IsInFreeList = true;
+        bool m_Group = true;
         void* operator new(size_t) = delete;
         void operator delete(void*) = delete;
     };
@@ -81,39 +80,13 @@ private:
 
     std::mutex& internalMutex() { return m_Mutex; }
 
-    static char* mmap(size_t aSize)
-    {
-        const int PROT = PROT_READ | PROT_WRITE;
-        const int FLAGS = MAP_PRIVATE | MAP_ANONYMOUS;
-        return static_cast<char*>(::mmap(nullptr, aSize, PROT, FLAGS, -1, 0));
-    }
-
-    Slab* newSlab(char* aMem)
-    {
-        Slab* sSlab = new (aMem) Slab;
-        m_AllList.insertBack(*sSlab);
-        ++m_SlabCount;
-        return sSlab;
-    }
-
     char* internalAlloc()
     {
-        if (MEMPOOL_UNLIKELY(0 == m_FreeCount && nullptr == m_NewSlab))
-            return mmapAndAlloc();
-        if (MEMPOOL_UNLIKELY(nullptr != m_NewSlab))
-        {
-            char* sRes = m_NewSlab->m_Blocks[m_NewSlabPos].m_Data;
-            if (MEMPOOL_UNLIKELY(BLOCKS_IN_SLAB == ++m_NewSlabPos))
-            {
-                m_NewSlab = m_NewSlab->m_NextNew;
-                m_NewSlabPos = 0;
-            }
-            return sRes;
-        }
+        if (MEMPOOL_UNLIKELY(0 == m_FreeCount))
+            getSlabs();
         --m_FreeCount;
-        SlabHeader* sSlab = &m_FreeList[m_FreeList[0].empty()].front();
-        char* sRes = sSlab->m_FreeList->m_Data;
-        sSlab->m_FreeList = sSlab->m_FreeList->m_Next;
+        Slab* sSlab = static_cast<Slab*>(&m_FreeList[m_FreeList[0].empty()].front());
+        char* sRes = sSlab->m_Blocks[sSlab->m_FreeMap.grab()].m_Data;
         --sSlab->m_FreeCount;
         const size_t MOVE_GROUP_TRESHOLD = BLOCKS_IN_SLAB * (50 - MOVE_GROUP_THRESHOLD_PERCENT) / 100;
         if (MEMPOOL_UNLIKELY(0 == sSlab->m_FreeCount))
@@ -132,19 +105,27 @@ private:
         return sRes;
     }
 
-    char* mmapAndAlloc()
+    static char* mmap(size_t aSize)
+    {
+        const int PROT = PROT_READ | PROT_WRITE;
+        const int FLAGS = MAP_PRIVATE | MAP_ANONYMOUS;
+        return static_cast<char*>(::mmap(nullptr, aSize, PROT, FLAGS, -1, 0));
+    }
+
+    void getSlabs()
     {
         size_t sCount = 1;
         char* sPtr = mmap(SLAB_SIZE);
+        if (MEMPOOL_UNLIKELY(MAP_FAILED == sPtr))
+            throw std::bad_alloc();
         uintptr_t sAddr = reinterpret_cast<uintptr_t>(sPtr);
-        if (MAP_FAILED == sPtr || 0 != sAddr % SLAB_SIZE)
+        if (0 != sAddr % SLAB_SIZE)
         {
-            if (MEMPOOL_LIKELY(MAP_FAILED != sPtr))
-                munmap(sPtr, SLAB_SIZE);
+            munmap(sPtr, SLAB_SIZE);
             sPtr = mmap(MAX_MMAP_SLABS * SLAB_SIZE);
-            sAddr = reinterpret_cast<uintptr_t>(sPtr);
             if (MEMPOOL_UNLIKELY(MAP_FAILED == sPtr))
                 throw std::bad_alloc();
+            sAddr = reinterpret_cast<uintptr_t>(sPtr);
             sCount = MAX_MMAP_SLABS;
             if (MEMPOOL_LIKELY(0 != sAddr % SLAB_SIZE))
             {
@@ -156,20 +137,21 @@ private:
                 munmap(sPtr + sCount * SLAB_SIZE, sPostCut);
             }
         }
-        Slab* sSlab = m_NewSlab = newSlab(sPtr);
-        for (size_t i = 1; i < sCount; i++)
-            sSlab = sSlab->m_NextNew = newSlab(sPtr + i * SLAB_SIZE);
-        sSlab->m_NextNew = nullptr;
-        m_NewSlabPos = 1;
-        return m_NewSlab->m_Blocks[0].m_Data;
+        m_SlabCount += sCount;
+        m_FreeCount += BLOCKS_IN_SLAB * sCount;
+        for (size_t i = 0; i < sCount; i++)
+        {
+            Slab* sSlab = new (sPtr + i * SLAB_SIZE) Slab;
+            m_AllList.insertBack(*sSlab);
+            m_FreeList[1].insert(*sSlab);
+        }
     }
 
     void internalFree(char* aBlock)
     {
-        Block* sBlock = reinterpret_cast<Block*>(aBlock);
         Slab* sSlab = slabByBlock(aBlock);
-        sBlock->m_Next = sSlab->m_FreeList;
-        sSlab->m_FreeList = sBlock;
+        Block* sBlock = reinterpret_cast<Block*>(aBlock);
+        sSlab->m_FreeMap.set(sBlock - sSlab->m_Blocks);
         size_t sWasFreeCount = sSlab->m_FreeCount++;
         if (MEMPOOL_LIKELY(sSlab->m_IsInFreeList))
             ++m_FreeCount;
@@ -188,7 +170,7 @@ private:
             m_FreeList[1].insert(*sSlab);
             sSlab->m_Group = true;
         }
-        else if(MEMPOOL_UNLIKELY(BLOCKS_IN_SLAB == sSlab->m_FreeCount && m_FreeCount >= 2 * BLOCKS_IN_SLAB))
+        else if(MEMPOOL_UNLIKELY(BLOCKS_IN_SLAB == sSlab->m_FreeCount && m_FreeCount > MAX_MMAP_SLABS * BLOCKS_IN_SLAB))
         {
             m_FreeList[1].remove(*sSlab);
             m_FreeCount -= BLOCKS_IN_SLAB;
@@ -213,6 +195,4 @@ private:
     SlightlyOrderedList<SlabHeader, &SlabHeader::m_FreeLink, SLAB_SIZE> m_FreeList[2];
     size_t m_SlabCount = 0;
     size_t m_FreeCount = 0;
-    Slab* m_NewSlab;
-    size_t m_NewSlabPos;
 };
