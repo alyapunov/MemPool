@@ -49,6 +49,7 @@ private:
         size_t m_FreeCount = 0;
         Slab* m_NextNew = nullptr;
         bool m_IsInFreeList = false;
+        bool m_Group = false;
         void* operator new(size_t) = delete;
         void operator delete(void*) = delete;
     };
@@ -121,11 +122,12 @@ private:
             m_FreeList[0].remove(*sSlab);
             sSlab->m_IsInFreeList = false;
         }
-        else if (MOVE_GROUP_TRESHOLD == sSlab->m_FreeCount)
+        else if (MOVE_GROUP_TRESHOLD == sSlab->m_FreeCount && sSlab->m_Group)
         {
             assert(m_FreeList[0].empty());
             m_FreeList[1].remove(*sSlab);
             m_FreeList[0].insert(*sSlab);
+            sSlab->m_Group = false;
         }
         return sRes;
     }
@@ -178,11 +180,13 @@ private:
             m_FreeCount += sSlab->m_FreeCount;
             m_FreeList[0].insert(*sSlab);
             sSlab->m_IsInFreeList = true;
+            sSlab->m_Group = false;
         }
-        else if (MEMPOOL_UNLIKELY(MOVE_GROUP_TRESHOLD == sWasFreeCount))
+        else if (MEMPOOL_UNLIKELY(MOVE_GROUP_TRESHOLD == sWasFreeCount && !sSlab->m_Group))
         {
             m_FreeList[0].remove(*sSlab);
             m_FreeList[1].insert(*sSlab);
+            sSlab->m_Group = true;
         }
         else if(MEMPOOL_UNLIKELY(BLOCKS_IN_SLAB == sSlab->m_FreeCount && m_FreeCount >= 2 * BLOCKS_IN_SLAB))
         {
