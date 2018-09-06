@@ -19,6 +19,8 @@ struct GlobalMemPoolPadding<0>
 {
 };
 
+template <size_t SIZE> class LocalMemPool;
+
 template <size_t SIZE>
 class GlobalMemPool
 {
@@ -30,6 +32,8 @@ public:
     static size_t freeCount() { return instance().m_FreeCount; }
 
 private:
+    friend class LocalMemPool<SIZE>;
+
     using Block = MemPoolBlock<SIZE>;
     static constexpr size_t BLOCK_SIZE = sizeof(Block);
     // Mempool calls mmap approximately once per SYSCALL_DIVIDER allocations.
