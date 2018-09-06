@@ -61,7 +61,9 @@ public:
         size_t sPos0 = __builtin_ctzll(m_Level0);
         size_t sPos1 = __builtin_ctzll(m_Level1[sPos0]);
         m_Level1[sPos0] ^= ONE << sPos1;
-        m_Level0 ^= (m_Level1[sPos0] ? ZERO : ONE) << sPos0;
+        if (m_Level1[sPos0] == 0)
+            m_Level0 ^= ONE << sPos0;
+//        m_Level0 ^= (m_Level1[sPos0] ? ZERO : ONE) << sPos0;
         return (sPos0 << SHIFT) | sPos1;
     }
 
