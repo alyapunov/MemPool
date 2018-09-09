@@ -50,76 +50,76 @@ struct AnnouncerTmpl
 static void compile_test()
 {
     ANNOUNCE();
-    LocalMemPool<1>::alloc();
-    LocalMemPool<2>::alloc();
-    LocalMemPool<3>::alloc();
-    LocalMemPool<4>::alloc();
-    LocalMemPool<5>::alloc();
-    LocalMemPool<6>::alloc();
-    LocalMemPool<7>::alloc();
-    LocalMemPool<8>::alloc();
-    LocalMemPool<9>::alloc();
-    LocalMemPool<10>::alloc();
-    LocalMemPool<11>::alloc();
-    LocalMemPool<12>::alloc();
-    LocalMemPool<13>::alloc();
-    LocalMemPool<14>::alloc();
-    LocalMemPool<15>::alloc();
-    LocalMemPool<16>::alloc();
-    LocalMemPool<17>::alloc();
-    LocalMemPool<18>::alloc();
-    LocalMemPool<19>::alloc();
-    LocalMemPool<20>::alloc();
-    LocalMemPool<21>::alloc();
-    LocalMemPool<22>::alloc();
-    LocalMemPool<23>::alloc();
-    LocalMemPool<24>::alloc();
-    LocalMemPool<25>::alloc();
-    LocalMemPool<26>::alloc();
-    LocalMemPool<27>::alloc();
-    LocalMemPool<28>::alloc();
-    LocalMemPool<29>::alloc();
-    LocalMemPool<30>::alloc();
-    LocalMemPool<31>::alloc();
-    LocalMemPool<32>::alloc();
-    LocalMemPool<33>::alloc();
-    LocalMemPool<34>::alloc();
-    LocalMemPool<35>::alloc();
-    LocalMemPool<36>::alloc();
-    LocalMemPool<37>::alloc();
-    LocalMemPool<38>::alloc();
-    LocalMemPool<39>::alloc();
-    LocalMemPool<40>::alloc();
-    LocalMemPool<41>::alloc();
-    LocalMemPool<42>::alloc();
-    LocalMemPool<43>::alloc();
-    LocalMemPool<44>::alloc();
-    LocalMemPool<45>::alloc();
-    LocalMemPool<46>::alloc();
-    LocalMemPool<47>::alloc();
-    LocalMemPool<48>::alloc();
-    LocalMemPool<49>::alloc();
-    LocalMemPool<50>::alloc();
-    LocalMemPool<51>::alloc();
-    LocalMemPool<52>::alloc();
-    LocalMemPool<53>::alloc();
-    LocalMemPool<54>::alloc();
-    LocalMemPool<55>::alloc();
-    LocalMemPool<56>::alloc();
-    LocalMemPool<57>::alloc();
-    LocalMemPool<58>::alloc();
-    LocalMemPool<59>::alloc();
-    LocalMemPool<60>::alloc();
-    LocalMemPool<61>::alloc();
-    LocalMemPool<62>::alloc();
-    LocalMemPool<63>::alloc();
-    LocalMemPool<64>::alloc();
-    LocalMemPool<65>::alloc();
-    LocalMemPool<66>::alloc();
-    LocalMemPool<67>::alloc();
-    LocalMemPool<68>::alloc();
-    LocalMemPool<69>::alloc();
-    LocalMemPool<70>::alloc();
+    LocalMemPool<1>::instance().alloc();
+    LocalMemPool<2>::instance().alloc();
+    LocalMemPool<3>::instance().alloc();
+    LocalMemPool<4>::instance().alloc();
+    LocalMemPool<5>::instance().alloc();
+    LocalMemPool<6>::instance().alloc();
+    LocalMemPool<7>::instance().alloc();
+    LocalMemPool<8>::instance().alloc();
+    LocalMemPool<9>::instance().alloc();
+    LocalMemPool<10>::instance().alloc();
+    LocalMemPool<11>::instance().alloc();
+    LocalMemPool<12>::instance().alloc();
+    LocalMemPool<13>::instance().alloc();
+    LocalMemPool<14>::instance().alloc();
+    LocalMemPool<15>::instance().alloc();
+    LocalMemPool<16>::instance().alloc();
+    LocalMemPool<17>::instance().alloc();
+    LocalMemPool<18>::instance().alloc();
+    LocalMemPool<19>::instance().alloc();
+    LocalMemPool<20>::instance().alloc();
+    LocalMemPool<21>::instance().alloc();
+    LocalMemPool<22>::instance().alloc();
+    LocalMemPool<23>::instance().alloc();
+    LocalMemPool<24>::instance().alloc();
+    LocalMemPool<25>::instance().alloc();
+    LocalMemPool<26>::instance().alloc();
+    LocalMemPool<27>::instance().alloc();
+    LocalMemPool<28>::instance().alloc();
+    LocalMemPool<29>::instance().alloc();
+    LocalMemPool<30>::instance().alloc();
+    LocalMemPool<31>::instance().alloc();
+    LocalMemPool<32>::instance().alloc();
+    LocalMemPool<33>::instance().alloc();
+    LocalMemPool<34>::instance().alloc();
+    LocalMemPool<35>::instance().alloc();
+    LocalMemPool<36>::instance().alloc();
+    LocalMemPool<37>::instance().alloc();
+    LocalMemPool<38>::instance().alloc();
+    LocalMemPool<39>::instance().alloc();
+    LocalMemPool<40>::instance().alloc();
+    LocalMemPool<41>::instance().alloc();
+    LocalMemPool<42>::instance().alloc();
+    LocalMemPool<43>::instance().alloc();
+    LocalMemPool<44>::instance().alloc();
+    LocalMemPool<45>::instance().alloc();
+    LocalMemPool<46>::instance().alloc();
+    LocalMemPool<47>::instance().alloc();
+    LocalMemPool<48>::instance().alloc();
+    LocalMemPool<49>::instance().alloc();
+    LocalMemPool<50>::instance().alloc();
+    LocalMemPool<51>::instance().alloc();
+    LocalMemPool<52>::instance().alloc();
+    LocalMemPool<53>::instance().alloc();
+    LocalMemPool<54>::instance().alloc();
+    LocalMemPool<55>::instance().alloc();
+    LocalMemPool<56>::instance().alloc();
+    LocalMemPool<57>::instance().alloc();
+    LocalMemPool<58>::instance().alloc();
+    LocalMemPool<59>::instance().alloc();
+    LocalMemPool<60>::instance().alloc();
+    LocalMemPool<61>::instance().alloc();
+    LocalMemPool<62>::instance().alloc();
+    LocalMemPool<63>::instance().alloc();
+    LocalMemPool<64>::instance().alloc();
+    LocalMemPool<65>::instance().alloc();
+    LocalMemPool<66>::instance().alloc();
+    LocalMemPool<67>::instance().alloc();
+    LocalMemPool<68>::instance().alloc();
+    LocalMemPool<69>::instance().alloc();
+    LocalMemPool<70>::instance().alloc();
 }
 
 template <size_t S>
@@ -158,11 +158,11 @@ struct Thing
     Thing(size_t aNum) { set(aNum); }
     void* operator new(size_t)
     {
-        return LocalMemPool<sizeof(Thing)>::alloc();
+        return LocalMemPool<sizeof(Thing)>::instance().alloc();
     }
     void operator delete(void* aPtr)
     {
-        LocalMemPool<sizeof(Thing)>::free(static_cast<char*>(aPtr));
+        LocalMemPool<sizeof(Thing)>::instance().free(static_cast<char*>(aPtr));
     }
 };
 
@@ -170,7 +170,7 @@ template <size_t S>
 static void seq_test()
 {
     ANNOUNCE_TMPL(S);
-    size_t sSlabCountOrig = GlobalMemPool<S>::slabCount();
+    size_t sSlabCountOrig = GlobalMemPool<S>::instance().slabCount();
     const size_t N = 8 * 1024;
     std::unordered_map<size_t, Thing<S>*> sMap;
     for (size_t i = 0; i < N; i++)
@@ -178,7 +178,7 @@ static void seq_test()
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
         sMap[i] = new Thing<S>(i);
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
     for (size_t i = 0; i < N; i++)
     {
@@ -186,16 +186,16 @@ static void seq_test()
         sMap.erase(i);
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
-    CHECK(GlobalMemPool<S>::slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
+    CHECK(GlobalMemPool<S>::instance().slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
 }
 
 template <size_t S>
 static void seq_rev_test()
 {
     ANNOUNCE_TMPL(S);
-    size_t sSlabCountOrig = GlobalMemPool<S>::slabCount();
+    size_t sSlabCountOrig = GlobalMemPool<S>::instance().slabCount();
     const size_t N = 8 * 1024;
     std::unordered_map<size_t, Thing<S>*> sMap;
     for (size_t i = 0; i < N; i++)
@@ -203,7 +203,7 @@ static void seq_rev_test()
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
         sMap[i] = new Thing<S>(i);
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
     for (size_t k = 0; k < N; k++)
     {
@@ -212,23 +212,23 @@ static void seq_rev_test()
         sMap.erase(i);
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
-    CHECK(GlobalMemPool<S>::slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
+    CHECK(GlobalMemPool<S>::instance().slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
 }
 
 template <size_t S>
 static void rand_test()
 {
     ANNOUNCE_TMPL(S);
-    size_t sSlabCountOrig = GlobalMemPool<S>::slabCount();
+    size_t sSlabCountOrig = GlobalMemPool<S>::instance().slabCount();
     const size_t N = 8 * 1024;
     const size_t M = N / 16;
     std::unordered_map<size_t, Thing<S>*> sMap;
     for (size_t i = 0; i < N; i++)
     {
         sMap[i] = new Thing<S>(i);
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
 
     for (size_t i = 0; i < N; i++)
@@ -260,9 +260,9 @@ static void rand_test()
         sMap.erase(i);
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
-    CHECK(GlobalMemPool<S>::slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
+    CHECK(GlobalMemPool<S>::instance().slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
 }
 
 

@@ -24,29 +24,31 @@ int main()
 {
     const size_t N = 16 * 1024 * 1024;
     using All = LocalMemPool<64>;
+    All& sAllInst = All::instance();
     using Gall = GlobalMemPool<64>;
+    Gall& sGallInst = Gall::instance();
     std::vector<char*> sAll(N, nullptr);
     checkpoint("", 0);
 
     for (size_t i = 0; i < N; i++)
-        sAll[i] = All::alloc();
+        sAll[i] = sAllInst.alloc();
     checkpoint("Alloc", N);
 
     for (size_t i = 0; i < N; i++)
-        All::free(sAll[i]);
+        sAllInst.free(sAll[i]);
     checkpoint("Free", N);
 
     for (size_t i = 0; i < N; i++)
-        sAll[i] = All::alloc();
+        sAll[i] = sAllInst.alloc();
     checkpoint("Alloc", N);
 
     for (size_t i = 0; i < N; i++)
-        All::free(sAll[i]);
+        sAllInst.free(sAll[i]);
     checkpoint("Free", N);
 
     for (size_t i = 0; i < N; i++)
     {
-        sAll[i] = All::alloc();
+        sAll[i] = sAllInst.alloc();
         sAll[i][0] = static_cast<char>(i);
     }
     checkpoint("Alloc touch", N);
@@ -64,36 +66,36 @@ int main()
             }
         }
         side_effect ^= sAll[i][0];
-        All::free(sAll[i]);
+        sAllInst.free(sAll[i]);
     }
     checkpoint("Free prefetch", N);
 
     for (size_t i = 0; i < N; i++)
-        sAll[i] = All::alloc();
+        sAll[i] =sAllInst.alloc();
     checkpoint("Alloc", N);
 
     for (size_t i = 0; i < N; i += 4)
     {
-        All::free(sAll[i]);
-        All::free(sAll[i + 1]);
-        All::free(sAll[i + 2]);
+        sAllInst.free(sAll[i]);
+        sAllInst.free(sAll[i + 1]);
+        sAllInst.free(sAll[i + 2]);
     }
     checkpoint("Free sparse", N * 3 / 4);
 
     for (size_t i = 0; i < N; i += 4)
     {
-        sAll[i] = All::alloc();
-        sAll[i + 1] = All::alloc();
-        sAll[i + 2] = All::alloc();
+        sAll[i] = sAllInst.alloc();
+        sAll[i + 1] = sAllInst.alloc();
+        sAll[i + 2] = sAllInst.alloc();
     }
     checkpoint("Alloc sparse", N * 3 / 4);
 
     for (size_t i = 0; i < N; i++)
-        All::free(sAll[i]);
+        sAllInst.free(sAll[i]);
     checkpoint("Free", N);
 
-    std::cout << "slabCount = " << Gall::slabCount() << std::endl;
-    std::cout << "freeCount = " << Gall::freeCount() << std::endl;
+    std::cout << "slabCount = " << sGallInst.slabCount() << std::endl;
+    std::cout << "freeCount = " << sGallInst.freeCount() << std::endl;
 
     std::cout << "Side effect (ignore it): " << (side_effect & 1) << std::endl;
 }

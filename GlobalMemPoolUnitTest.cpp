@@ -50,76 +50,76 @@ struct AnnouncerTmpl
 static void compile_test()
 {
     ANNOUNCE();
-    GlobalMemPool<1>::alloc();
-    GlobalMemPool<2>::alloc();
-    GlobalMemPool<3>::alloc();
-    GlobalMemPool<4>::alloc();
-    GlobalMemPool<5>::alloc();
-    GlobalMemPool<6>::alloc();
-    GlobalMemPool<7>::alloc();
-    GlobalMemPool<8>::alloc();
-    GlobalMemPool<9>::alloc();
-    GlobalMemPool<10>::alloc();
-    GlobalMemPool<11>::alloc();
-    GlobalMemPool<12>::alloc();
-    GlobalMemPool<13>::alloc();
-    GlobalMemPool<14>::alloc();
-    GlobalMemPool<15>::alloc();
-    GlobalMemPool<16>::alloc();
-    GlobalMemPool<17>::alloc();
-    GlobalMemPool<18>::alloc();
-    GlobalMemPool<19>::alloc();
-    GlobalMemPool<20>::alloc();
-    GlobalMemPool<21>::alloc();
-    GlobalMemPool<22>::alloc();
-    GlobalMemPool<23>::alloc();
-    GlobalMemPool<24>::alloc();
-    GlobalMemPool<25>::alloc();
-    GlobalMemPool<26>::alloc();
-    GlobalMemPool<27>::alloc();
-    GlobalMemPool<28>::alloc();
-    GlobalMemPool<29>::alloc();
-    GlobalMemPool<30>::alloc();
-    GlobalMemPool<31>::alloc();
-    GlobalMemPool<32>::alloc();
-    GlobalMemPool<33>::alloc();
-    GlobalMemPool<34>::alloc();
-    GlobalMemPool<35>::alloc();
-    GlobalMemPool<36>::alloc();
-    GlobalMemPool<37>::alloc();
-    GlobalMemPool<38>::alloc();
-    GlobalMemPool<39>::alloc();
-    GlobalMemPool<40>::alloc();
-    GlobalMemPool<41>::alloc();
-    GlobalMemPool<42>::alloc();
-    GlobalMemPool<43>::alloc();
-    GlobalMemPool<44>::alloc();
-    GlobalMemPool<45>::alloc();
-    GlobalMemPool<46>::alloc();
-    GlobalMemPool<47>::alloc();
-    GlobalMemPool<48>::alloc();
-    GlobalMemPool<49>::alloc();
-    GlobalMemPool<50>::alloc();
-    GlobalMemPool<51>::alloc();
-    GlobalMemPool<52>::alloc();
-    GlobalMemPool<53>::alloc();
-    GlobalMemPool<54>::alloc();
-    GlobalMemPool<55>::alloc();
-    GlobalMemPool<56>::alloc();
-    GlobalMemPool<57>::alloc();
-    GlobalMemPool<58>::alloc();
-    GlobalMemPool<59>::alloc();
-    GlobalMemPool<60>::alloc();
-    GlobalMemPool<61>::alloc();
-    GlobalMemPool<62>::alloc();
-    GlobalMemPool<63>::alloc();
-    GlobalMemPool<64>::alloc();
-    GlobalMemPool<65>::alloc();
-    GlobalMemPool<66>::alloc();
-    GlobalMemPool<67>::alloc();
-    GlobalMemPool<68>::alloc();
-    GlobalMemPool<69>::alloc();
-    GlobalMemPool<70>::alloc();
+    GlobalMemPool<1>::instance().alloc();
+    GlobalMemPool<2>::instance().alloc();
+    GlobalMemPool<3>::instance().alloc();
+    GlobalMemPool<4>::instance().alloc();
+    GlobalMemPool<5>::instance().alloc();
+    GlobalMemPool<6>::instance().alloc();
+    GlobalMemPool<7>::instance().alloc();
+    GlobalMemPool<8>::instance().alloc();
+    GlobalMemPool<9>::instance().alloc();
+    GlobalMemPool<10>::instance().alloc();
+    GlobalMemPool<11>::instance().alloc();
+    GlobalMemPool<12>::instance().alloc();
+    GlobalMemPool<13>::instance().alloc();
+    GlobalMemPool<14>::instance().alloc();
+    GlobalMemPool<15>::instance().alloc();
+    GlobalMemPool<16>::instance().alloc();
+    GlobalMemPool<17>::instance().alloc();
+    GlobalMemPool<18>::instance().alloc();
+    GlobalMemPool<19>::instance().alloc();
+    GlobalMemPool<20>::instance().alloc();
+    GlobalMemPool<21>::instance().alloc();
+    GlobalMemPool<22>::instance().alloc();
+    GlobalMemPool<23>::instance().alloc();
+    GlobalMemPool<24>::instance().alloc();
+    GlobalMemPool<25>::instance().alloc();
+    GlobalMemPool<26>::instance().alloc();
+    GlobalMemPool<27>::instance().alloc();
+    GlobalMemPool<28>::instance().alloc();
+    GlobalMemPool<29>::instance().alloc();
+    GlobalMemPool<30>::instance().alloc();
+    GlobalMemPool<31>::instance().alloc();
+    GlobalMemPool<32>::instance().alloc();
+    GlobalMemPool<33>::instance().alloc();
+    GlobalMemPool<34>::instance().alloc();
+    GlobalMemPool<35>::instance().alloc();
+    GlobalMemPool<36>::instance().alloc();
+    GlobalMemPool<37>::instance().alloc();
+    GlobalMemPool<38>::instance().alloc();
+    GlobalMemPool<39>::instance().alloc();
+    GlobalMemPool<40>::instance().alloc();
+    GlobalMemPool<41>::instance().alloc();
+    GlobalMemPool<42>::instance().alloc();
+    GlobalMemPool<43>::instance().alloc();
+    GlobalMemPool<44>::instance().alloc();
+    GlobalMemPool<45>::instance().alloc();
+    GlobalMemPool<46>::instance().alloc();
+    GlobalMemPool<47>::instance().alloc();
+    GlobalMemPool<48>::instance().alloc();
+    GlobalMemPool<49>::instance().alloc();
+    GlobalMemPool<50>::instance().alloc();
+    GlobalMemPool<51>::instance().alloc();
+    GlobalMemPool<52>::instance().alloc();
+    GlobalMemPool<53>::instance().alloc();
+    GlobalMemPool<54>::instance().alloc();
+    GlobalMemPool<55>::instance().alloc();
+    GlobalMemPool<56>::instance().alloc();
+    GlobalMemPool<57>::instance().alloc();
+    GlobalMemPool<58>::instance().alloc();
+    GlobalMemPool<59>::instance().alloc();
+    GlobalMemPool<60>::instance().alloc();
+    GlobalMemPool<61>::instance().alloc();
+    GlobalMemPool<62>::instance().alloc();
+    GlobalMemPool<63>::instance().alloc();
+    GlobalMemPool<64>::instance().alloc();
+    GlobalMemPool<65>::instance().alloc();
+    GlobalMemPool<66>::instance().alloc();
+    GlobalMemPool<67>::instance().alloc();
+    GlobalMemPool<68>::instance().alloc();
+    GlobalMemPool<69>::instance().alloc();
+    GlobalMemPool<70>::instance().alloc();
 }
 
 template <size_t S>
@@ -158,11 +158,11 @@ struct Thing
     Thing(size_t aNum) { set(aNum); }
     void* operator new(size_t)
     {
-        return GlobalMemPool<sizeof(Thing)>::alloc();
+        return GlobalMemPool<sizeof(Thing)>::instance().alloc();
     }
     void operator delete(void* aPtr)
     {
-        GlobalMemPool<sizeof(Thing)>::free(static_cast<char*>(aPtr));
+        GlobalMemPool<sizeof(Thing)>::instance().free(static_cast<char*>(aPtr));
     }
 };
 
@@ -170,7 +170,7 @@ template <size_t S>
 static void seq_test()
 {
     ANNOUNCE_TMPL(S);
-    size_t sSlabCountOrig = GlobalMemPool<S>::slabCount();
+    size_t sSlabCountOrig = GlobalMemPool<S>::instance().slabCount();
     const size_t N = 8 * 1024;
     std::unordered_map<size_t, Thing<S>*> sMap;
     for (size_t i = 0; i < N; i++)
@@ -178,7 +178,7 @@ static void seq_test()
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
         sMap[i] = new Thing<S>(i);
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
     for (size_t i = 0; i < N; i++)
     {
@@ -186,16 +186,16 @@ static void seq_test()
         sMap.erase(i);
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
-    CHECK(GlobalMemPool<S>::slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
+    CHECK(GlobalMemPool<S>::instance().slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
 }
 
 template <size_t S>
 static void seq_rev_test()
 {
     ANNOUNCE_TMPL(S);
-    size_t sSlabCountOrig = GlobalMemPool<S>::slabCount();
+    size_t sSlabCountOrig = GlobalMemPool<S>::instance().slabCount();
     const size_t N = 8 * 1024;
     std::unordered_map<size_t, Thing<S>*> sMap;
     for (size_t i = 0; i < N; i++)
@@ -203,7 +203,7 @@ static void seq_rev_test()
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
         sMap[i] = new Thing<S>(i);
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
     for (size_t k = 0; k < N; k++)
     {
@@ -212,23 +212,23 @@ static void seq_rev_test()
         sMap.erase(i);
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
-    CHECK(GlobalMemPool<S>::slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
+    CHECK(GlobalMemPool<S>::instance().slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
 }
 
 template <size_t S>
 static void rand_test()
 {
     ANNOUNCE_TMPL(S);
-    size_t sSlabCountOrig = GlobalMemPool<S>::slabCount();
+    size_t sSlabCountOrig = GlobalMemPool<S>::instance().slabCount();
     const size_t N = 8 * 1024;
     const size_t M = N / 16;
     std::unordered_map<size_t, Thing<S>*> sMap;
     for (size_t i = 0; i < N; i++)
     {
         sMap[i] = new Thing<S>(i);
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
 
     for (size_t i = 0; i < N; i++)
@@ -260,9 +260,9 @@ static void rand_test()
         sMap.erase(i);
         for (const auto& sPair : sMap)
             CHECK(sPair.second->good(sPair.first));
-        CHECK(GlobalMemPool<S>::slabCount() > sSlabCountOrig);
+        CHECK(GlobalMemPool<S>::instance().slabCount() > sSlabCountOrig);
     }
-    CHECK(GlobalMemPool<S>::slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
+    CHECK(GlobalMemPool<S>::instance().slabCount() <= GlobalMemPool<S>::MAX_MMAP_SLABS + 1);
 }
 
 

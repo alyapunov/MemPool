@@ -19,21 +19,18 @@ struct GlobalMemPoolPadding<0>
 {
 };
 
-template <size_t SIZE> class LocalMemPool;
-
 template <size_t SIZE>
 class GlobalMemPool
 {
 public:
-    static std::mutex& mutex() { return instance().internalMutex(); }
-    static char* alloc() { return instance().internalAlloc(); }
-    static void free(char* aBlock) { return instance().internalFree(aBlock); }
-    static size_t slabCount() { return instance().m_SlabCount; }
-    static size_t freeCount() { return instance().m_FreeCount; }
+    static GlobalMemPool& instance() { static GlobalMemPool sInst; return sInst; }
+    std::mutex& mutex() { return internalMutex(); }
+    char* alloc() { return internalAlloc(); }
+    void free(char* aBlock) { return internalFree(aBlock); }
+    size_t slabCount() const { return m_SlabCount; }
+    size_t freeCount() const { return m_FreeCount; }
 
 private:
-    friend class LocalMemPool<SIZE>;
-
     using Block = MemPoolBlock<SIZE>;
     static constexpr size_t BLOCK_SIZE = sizeof(Block);
     // Mempool calls mmap approximately once per SYSCALL_DIVIDER allocations.
@@ -72,8 +69,6 @@ private:
         void operator delete(void* sPtr) { munmap(sPtr, SLAB_SIZE); }
     };
     static_assert(sizeof(Slab) == SLAB_SIZE, "Smth went wrong");
-
-    static GlobalMemPool& instance() { static GlobalMemPool sInst; return sInst; }
 
     GlobalMemPool() = default;
     ~GlobalMemPool()
