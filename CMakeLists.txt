@@ -14,8 +14,7 @@ ENDIF()
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_C_STANDARD 11)
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Werror")
-SET(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+ADD_COMPILE_OPTIONS(-Wall -Wextra -Wpedantic -Werror)
 
 include_directories(. ./Lists)
 add_subdirectory(./Lists)
