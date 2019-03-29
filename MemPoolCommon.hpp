@@ -12,17 +12,16 @@ struct MemPoolBlock
     union
     {
         char m_Data[SIZE];
-        MemPoolBlock* m_Next;
     };
     static void check() { static_assert(sizeof(MemPoolBlock) == SIZE, "Smth went wrong"); }
 };
 
-inline constexpr size_t memPoolLog2(size_t a)
+inline constexpr size_t memPoolLog2(size_t a) noexcept
 {
     return a <= 1 ? 0 : 1 + memPoolLog2(a / 2);
 }
 
-inline constexpr size_t memPoolCeil2(size_t a)
+inline constexpr size_t memPoolCeil2(size_t a) noexcept
 {
     return 0 == (a & (a - 1)) ? a : size_t(2) << memPoolLog2(a);
 }
@@ -30,7 +29,7 @@ inline constexpr size_t memPoolCeil2(size_t a)
 template <size_t SIZE>
 class MemPoolBitset
 {
-    using type_t = unsigned long long; // corresponds __builtin_ctzll(..)
+    using type_t = unsigned long long; // corresponds to __builtin_ctzll(..)
     static constexpr size_t TYPE_BITS = sizeof(type_t) * CHAR_BIT;
     static constexpr type_t ZERO = 0;
     static constexpr type_t ONE = 1;

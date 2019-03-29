@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <thread>
 #include <vector>
 
 size_t side_effect = 0;
@@ -18,6 +19,39 @@ static void checkpoint(const char* aText, size_t aOpCount)
         std::cout << aText << ": " << Mrps << " Mrps" << std::endl;
     }
     was = now;
+}
+
+static void thread_test(double& alloc_mrps, double& free_mrps)
+{
+    const size_t N = 1024 * 1024;
+    using All = GlobalMemPool<64>;
+    All& sAllInst = All::instance();
+    std::vector<char*> sAll(N, nullptr);
+
+    using namespace std::chrono;
+    high_resolution_clock::time_point was = high_resolution_clock::now();
+
+    for (size_t i = 0; i < N; i++)
+    {
+        std::lock_guard<std::mutex> sLock(sAllInst.mutex());
+        sAll[i] = sAllInst.alloc();
+    }
+
+    high_resolution_clock::time_point mid = high_resolution_clock::now();
+
+    for (size_t i = 0; i < N; i++)
+    {
+        std::lock_guard<std::mutex> sLock(sAllInst.mutex());
+        sAllInst.free(sAll[i]);
+    }
+
+    high_resolution_clock::time_point now = high_resolution_clock::now();
+
+    duration<double> time_span;
+    time_span = duration_cast<duration<double>>(mid - was);
+    alloc_mrps = N / 1000000. / time_span.count();
+    time_span = duration_cast<duration<double>>(now - mid);
+    free_mrps = N / 1000000. / time_span.count();
 }
 
 int main()
@@ -91,6 +125,24 @@ int main()
     for (size_t i = 0; i < N; i++)
         sAllInst.free(sAll[i]);
     checkpoint("Free", N);
+
+    const size_t NUM_THREADS = 16;
+    std::thread threads[NUM_THREADS];
+    double alloc_mrps[NUM_THREADS];
+    double free_mrps[NUM_THREADS];
+    for (size_t i = 0; i < NUM_THREADS; i++)
+        threads[i] = std::thread(thread_test, std::ref(alloc_mrps[i]), std::ref(free_mrps[i]));
+
+    double total_alloc_mrps = 0.;
+    double total_free_mrps = 0.;
+    for (size_t i = 0; i < NUM_THREADS; i++)
+    {
+        threads[i].join();
+        total_alloc_mrps += alloc_mrps[i];
+        total_free_mrps += free_mrps[i];
+    }
+    std::cout << "Threads alloc: " << total_alloc_mrps << " Mrps" << std::endl;
+    std::cout << "Threads free: " << total_free_mrps << " Mrps" << std::endl;
 
     std::cout << "slabCount = " << sAllInst.slabCount() << std::endl;
     std::cout << "freeCount = " << sAllInst.freeCount() << std::endl;

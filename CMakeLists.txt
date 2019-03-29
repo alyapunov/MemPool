@@ -21,8 +21,10 @@ add_subdirectory(./Lists)
 
 add_executable(GlobalMemPoolUnit.test MemPoolCommon.hpp GlobalMemPool.hpp GlobalMemPoolUnitTest.cpp)
 add_executable(GlobalMemPoolPerf.test MemPoolCommon.hpp GlobalMemPool.hpp GlobalMemPoolPerfTest.cpp)
+target_link_libraries(GlobalMemPoolPerf.test pthread)
 add_executable(LocalMemPoolUnit.test MemPoolCommon.hpp LocalMemPool.hpp GlobalMemPool.hpp LocalMemPoolUnitTest.cpp)
 add_executable(LocalMemPoolPerf.test MemPoolCommon.hpp LocalMemPool.hpp GlobalMemPool.hpp LocalMemPoolPerfTest.cpp)
+target_link_libraries(LocalMemPoolPerf.test pthread)
 
 enable_testing()
 add_test(NAME GlobalMemPoolUnit.test COMMAND GlobalMemPoolUnit.test)
